@@ -1,140 +1,140 @@
-#include <iostream>
+#include <iostream> 
 #include <vector>
-#include <algorithm>
+
 
 using namespace std;
 
-vector < int > belt;
-vector < int > robot;
-int N, K;	//벨트 길이, 내구도 0 갯수
+// 2021.4.2 17:00 시작 
+
+/*
+전역변수 : N, K, T, velt, life_velt
+
+- velt[2][] : 로봇이 있으면 true, 없으면 false
+- life_velt[2][] : int vector
+
+- pop & push 로 회전 구현
+- 내구도 >= 1 && !로봇 
+  - 로봇 이동
+  - 가능한 케이스 
+    1. (n+1)에 아무것도 없음 : velt[n] = false, velt[n+1] = true
+	2. (n+1)에 아무것도 없는데 끝임 : velt[n] = false, K--
+	3. (n+1)에 있음 : 이동 X
+*/
 
 
-void print_belt() {
-	for (int i = 0; i < 2 * N; i++) {
-		cout.width(3); // 폭을 10으로 지정
-		cout.fill(' '); // 채움 문자는 '0'
-		cout << belt[i] << " ";
+int N, K, T;
+
+vector <bool> velt;
+vector <vector <int>> life_velt;
+
+void print_velt() {
+	cout << "==========================" << endl;
+	
+	for (int j = 0; j < N; j++) {
+		cout.width(3);
+		cout.fill(' ');
+		cout << velt[j] << " ";
 	}
 	cout << endl;
-	int j = robot.size()-1;
-	for (int i = 0; i < N; i++) {
-		cout.width(4); // 폭을 10으로 지정
-		cout.fill(' '); // 채움 문자는 '0'
-		if (robot.size() > 0 && j < robot.size() && i == robot[j]) {
 
-			cout << "1 ";
-			j--;
+	cout << endl;
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < N; j++) {
+			cout.width(3);
+			cout.fill(' ');
+			cout << life_velt[i][j] << " ";
 		}
-		else {
-			cout << "0 ";
-		}
+		cout << endl;
 	}
 	cout << endl;
+
 }
 
-void rotate_belt() {
-	// 회전
-	int tmp = belt[2*N-1];
 
-	//벨트 회전
-	for (int i = 2 * N -1; i > 0; i--) {
-		belt[i] = belt[i - 1];
-	}
-	//로봇도 같이 회전
-	for (int i = 0; i < robot.size(); i++) {
-		if (robot[i] < N - 2) {
-			robot[i]++;
-		}
-		else {
-			robot.erase(robot.begin());
-			i--;
-		}
-	}
+void rotate() {
+	int last, first;
+	last = life_velt[0][N-1];
+	first = life_velt[1][0];
 
-	belt[0] = tmp;
+	life_velt[0].erase(life_velt[0].begin() + (N - 1));
+	life_velt[1].erase(life_velt[1].begin());
+
+	life_velt[0].insert(life_velt[0].begin(), first);
+	life_velt[1].push_back(last);
+
+	velt.erase(velt.begin() + (N - 1));
+	velt.insert(velt.begin(), false);
+
+	if (velt[N - 1] == true) {
+		velt[N - 1] = false;
+	}
 }
-
 void move_robot() {
-	// 이동
-	if (robot.size() != 0) {
-		for (int i = 0; i < robot.size(); i++) {
-			// 이동 조건
-			// - N-1이 아니여야함
-			// - 앞에 로봇이 없어야 함
-			// - 앞에 벨트의 내구도가 0이 아니어야함
+	for (int i = N - 1; i > 0; i--) {
+		// 벨트 끝에서부터 비었는지 확인하고
+		// 이동 가능하면 앞의 로봇을 가져옴
+		
 
-			if (i > 0 && i + 1 < N - 1 && robot[i] + 1 == robot[i - 1]) {
-				// 맨 오른쪽의 로봇이 아니면서, 다음 로봇이 N-1보다 앞의 위치에 있고, 현재로봇의 바로 앞에 있는 경우.
-				continue;
-			}
+		if (velt[i-1] == true && velt[i] == false 
+			&& life_velt[0][i] > 0) {
+			//앞에 로봇이 존재하고, 이동 가능하면,
+			velt[i] = true;
+			velt[i-1] = false;
+			life_velt[0][i]--;
 
-			if (robot[i] < N - 1 && belt[robot[i] + 1] > 0) {
-				robot[i]++;
-				belt[robot[i]]--;
+			if (life_velt[0][i] == 0) {
+				K--;
 			}
+		}
+	}
 
-			if (robot[i] == N - 1) {
-				robot.erase(robot.begin() + i);
-				i--;
-			}
+	if (velt[N - 1] == true) {
+		velt[N - 1] = false;
+	}
+}
+void put_in_robot() {
+
+	if (velt[0] == false && life_velt[0][0] > 0) {
+		velt[0] = true;
+		life_velt[0][0]--;
+
+		if (life_velt[0][0] == 0) {
+			K--;
 		}
 	}
 }
 
-void push_robot() {
-	// 탑승
 
-	if (belt[0] >= 1) {
-		robot.push_back(0);
-		belt[0]--;
+void solve() {
+	while (true) {
+		rotate();
+		//print_velt();
+		move_robot();
+		//print_velt();
+		put_in_robot();
+		//print_velt();
+		T++;
+		//cout << "=============" << T << "============" << endl;
+		if (K == 0) break;
 	}
 }
-
-int check_belt() {
-	// 체크
-	int count = 0;
-
-	for (int i = 0; i < belt.size(); i++) {
-		if (belt[i] == 0) count++;
-	}
-
-	return count;
-}
-
-
 
 int main() {
 	cin >> N >> K;
-	
-	belt = vector<int>(2 * N, 0);
-	
-	//input
-	for (int i = 0; i < 2 * N; i++) {
-		cin >> belt[i];
+
+	velt = vector<bool>(N, false);
+	life_velt = vector<vector<int>>(2, vector<int>(N, 0));
+
+	for (int i = 0; i < N; i++) {
+		cin >> life_velt[0][i];
+	}
+	for (int i = N - 1; i >= 0; i--) {
+		cin >> life_velt[1][i];
 	}
 
-	//1. 회전
-	//2. 로봇 이동
-	//3. 앞에 로봇 탑승
-	//4. 내구도 0 갯수 체크
-
-	int count = 1;
-	while (true) {
-		cout << "---------------------------------" << endl;
-		rotate_belt();	//1
-		print_belt();
-		move_robot();	//2
-		print_belt();
-		push_robot();	//3
-		print_belt();
-		if (check_belt() >= K) {	//4
-			cout << count;
-			break;
-		}
-		else {
-			count++;
-		}
-	}
+	T = 0;
+	solve();
+	cout << T;
 
 	return 0;
 }
