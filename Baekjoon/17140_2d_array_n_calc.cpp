@@ -48,46 +48,31 @@ void print_arr() {
 }
 
 
-
 void sorting_R(int max_sz) {
-	
+
 
 	for (int c = 0; c < list_map.size(); c++) {
 		vector<pair<int, int>> list_pair;
 
-		//행 마다 계산된 맵에서 하나씩 꺼내어 벡터 순서대로 삽입
+		// 행 마다 계산된 맵에서 하나씩 꺼내어 벡터 순서대로 삽입
+		// 등장한 횟수를 먼저 기준으로 하기 때문에 value 값을 앞자리에 넣어 pair 삽입
 		for (auto elem : list_map[c]) {
-			if (elem.first == 0) continue;
-			if (list_pair.size() == 0) {
-				list_pair.push_back(pair<int, int>(elem.first, elem.second));
-			}
-			else {
-				int i = 0;
-				for (i = 0; i < list_pair.size(); i++) {
-					if (elem.second > list_pair[i].second) continue;
-					if (elem.second == list_pair[i].second 
-						&& elem.first > list_pair[i].first) continue;
-
-					//알맞은 자리 i 를 찾으면 for loop 종료
-					break;
-				}
-
-				// 알맞는 자리 i에 삽입
-				list_pair.insert(list_pair.begin() + i, pair<int, int>(elem.first, elem.second));
-			}
+			list_pair.push_back(pair<int, int>(elem.second, elem.first));
 		}
+
+		sort(list_pair.begin(), list_pair.end());
 
 		// 해당 행의 길이를 최대로 맞춤
 		arr[c] = vector<int>(max_sz);
-		
+
 		int i = 0;
 		while (true) {
 			if (i == max_sz / 2) break;
 
 			if (i < list_pair.size()) {
 				// 맵에 구성된 키의 갯수 만큼 할당
-				arr[c][i * 2] = list_pair[i].first;
-				arr[c][i * 2 + 1] = list_pair[i].second;
+				arr[c][i * 2] = list_pair[i].second;
+				arr[c][i * 2 + 1] = list_pair[i].first;
 			}
 			else {
 				// 나머지는 0으로 채움
@@ -99,6 +84,7 @@ void sorting_R(int max_sz) {
 		}
 	}
 }
+
 void sorting_C(int max_sz) {
 	while (true) {
 		//길이 맞추기
@@ -109,35 +95,20 @@ void sorting_C(int max_sz) {
 	for (int r = 0; r < list_map.size(); r++) {
 		vector<pair<int, int>> list_pair;
 
-
 		for (auto elem : list_map[r]) {
-			if (elem.first == 0) continue;
-			if (list_pair.size() == 0) {
-				list_pair.push_back(pair<int, int>(elem.first, elem.second));
-			}
-			else {
-				int i = 0;
-				for (i = 0; i < list_pair.size(); i++) {
-					if (elem.second > list_pair[i].second) continue;
-					if (elem.second == list_pair[i].second
-						&& elem.first > list_pair[i].first) continue;
-
-					break;
-				}
-				list_pair.insert(list_pair.begin() + i, pair<int, int>(elem.first, elem.second));
-			}
+			list_pair.push_back(pair<int, int>(elem.second, elem.first));
 		}
 
+		sort(list_pair.begin(), list_pair.end());
 
-		
 		int i = 0;
-		
+
 		while (true) {
 			if (i == max_sz / 2) break;
 
 			if (i < list_pair.size()) {
-				arr[i * 2][r] = list_pair[i].first;
-				arr[i * 2 + 1][r] = list_pair[i].second;
+				arr[i * 2][r] = list_pair[i].second;
+				arr[i * 2 + 1][r] = list_pair[i].first;
 			}
 			else {
 				arr[i * 2][r] = 0;
@@ -210,7 +181,7 @@ int solution() {
 			R();
 		else
 			C();
-			
+		print_arr();
 		t++;
 	}
 
